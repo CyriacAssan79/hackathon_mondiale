@@ -20,33 +20,54 @@ class ModelLoader:
     def __init__(self):
         self.model = None
         self.selected_features = None
+        self.loaded = False
+        self.error = None
 
     def load(self):
-        print("📥 Téléchargement des fichiers depuis Hugging Face...")
+        if self.loaded:
+            return
 
-        model_path = hf_hub_download(
-            repo_id=REPO_ID,
-            filename=MODEL_FILENAME,
-        )
+        try:
+            print("📥 Téléchargement des fichiers depuis Hugging Face...")
 
-        features_path = hf_hub_download(
-            repo_id=REPO_ID,
-            filename=FEATURES_FILENAME,
-        )
+            model_path = hf_hub_download(
+                repo_id=REPO_ID,
+                filename=MODEL_FILENAME,
+            )
 
-        print("📦 Chargement du modèle...")
+            features_path = hf_hub_download(
+                repo_id=REPO_ID,
+                filename=FEATURES_FILENAME,
+            )
 
-        self.model = joblib.load(model_path)
-        self.selected_features = joblib.load(features_path)
+            print("📦 Chargement du modèle...")
 
-        print("✅ Modèle chargé avec succès")
-        print(f"✅ Nombre de variables : {len(self.selected_features)}")
+            self.model = joblib.load(model_path)
+            self.selected_features = joblib.load(features_path)
+            self.loaded = True
+            self.error = None
+
+            print("✅ Modèle chargé avec succès")
+            print(f"✅ Nombre de variables : {len(self.selected_features)}")
+
+        except Exception as exc:
+            self.model = None
+            self.selected_features = None
+            self.loaded = False
+            self.error = str(exc)
+            print(f"⚠️ Impossible de charger le modèle au démarrage : {exc}")
 
     def get_model(self):
+        self.load()
         return self.model
 
     def get_features(self):
+        self.load()
         return self.selected_features
+
+    def is_ready(self):
+        self.load()
+        return self.model is not None and self.selected_features is not None
 
 
 # Instance globale

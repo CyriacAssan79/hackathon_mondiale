@@ -9,6 +9,9 @@ class PredictionService:
         model = model_loader.get_model()
         selected_features = model_loader.get_features()
 
+        if model is None or selected_features is None:
+            raise RuntimeError("Le modèle n'est pas disponible pour le moment.")
+
         X = preprocess_input(
             data,
             selected_features
@@ -21,7 +24,5 @@ class PredictionService:
             "next_longitude": float(prediction[0][1])
         }
 
-
-prediction_service = PredictionService()
 
 prediction_service = PredictionService()

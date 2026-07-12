@@ -8,14 +8,7 @@ from app.schemas import (
     ModelInfoResponse
 )
 
-from app.model_loader import model_loader
 from app.predictor import prediction_service
-
-# ==================================================
-# Chargement du modèle au démarrage
-# ==================================================
-
-model_loader.load()
 
 # ==================================================
 # Création de l'application
@@ -77,6 +70,15 @@ def predict_position(request: PredictionRequest):
         )
 
         return prediction
+
+    except RuntimeError as e:
+
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": str(e)
+            }
+        )
 
     except Exception as e:
 
