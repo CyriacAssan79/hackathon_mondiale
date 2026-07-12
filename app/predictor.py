@@ -16,6 +16,11 @@ class PredictionService:
 
         print("3 - Features chargées")
 
+        if model is None or selected_features is None:
+            raise RuntimeError(
+                "Le modèle n'est pas prêt. Vérifiez que le serveur a chargé le modèle au démarrage."
+            )
+
         X = preprocess_input(
             data,
             selected_features

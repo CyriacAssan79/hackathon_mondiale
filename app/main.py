@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.model_loader import model_loader
 from app.schemas import (
     PredictionRequest,
     PredictionResponse,
@@ -19,6 +21,26 @@ app = FastAPI(
     description="API de prédiction de la prochaine position GPS d'un automobiliste",
     version="1.0.0"
 )
+
+
+@app.on_event("startup")
+def startup_event():
+    """Précharge le modèle au démarrage pour éviter les délais de première requête."""
+    model_loader.load()
+
+
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "status": "error",
+            "code": 422,
+            "message": "Données de requête invalides",
+            "details": exc.errors(),
+        },
+    )
+
 
 # ==================================================
 # Routes
@@ -39,8 +61,10 @@ def root():
 )
 def health():
 
+    status = "healthy" if model_loader.is_ready() else "unhealthy"
+
     return {
-        "status": "healthy"
+        "status": status
     }
 
 

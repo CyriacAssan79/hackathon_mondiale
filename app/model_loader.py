@@ -58,15 +58,12 @@ class ModelLoader:
             print(f"⚠️ Impossible de charger le modèle au démarrage : {exc}")
 
     def get_model(self):
-        self.load()
         return self.model
 
     def get_features(self):
-        self.load()
         return self.selected_features
 
     def is_ready(self):
-        self.load()
         return self.model is not None and self.selected_features is not None
 
 
