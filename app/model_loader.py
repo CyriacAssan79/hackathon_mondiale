@@ -1,17 +1,20 @@
-from pathlib import Path
+from huggingface_hub import hf_hub_download
 import joblib
 
-# Dossier contenant les modèles
-MODELS_DIR = Path(__file__).parent / "models"
 
-MODEL_PATH = MODELS_DIR / "extra_trees_regressor.joblib"
-FEATURES_PATH = MODELS_DIR / "selected_features.joblib"
+# ==============================
+# Configuration Hugging Face
+# ==============================
+REPO_ID = "Cyriac2002/extra_trees_regressor"
+
+MODEL_FILENAME = "extra_trees_regressor.joblib"
+FEATURES_FILENAME = "selected_features.joblib"
 
 
 class ModelLoader:
     """
-    Charge le modèle et les variables une seule fois
-    au démarrage de l'application.
+    Télécharge et charge le modèle ainsi que les variables
+    une seule fois au démarrage de l'API.
     """
 
     def __init__(self):
@@ -19,10 +22,22 @@ class ModelLoader:
         self.selected_features = None
 
     def load(self):
-        """Charge les fichiers .joblib"""
+        print("📥 Téléchargement des fichiers depuis Hugging Face...")
 
-        self.model = joblib.load(MODEL_PATH)
-        self.selected_features = joblib.load(FEATURES_PATH)
+        model_path = hf_hub_download(
+            repo_id=REPO_ID,
+            filename=MODEL_FILENAME,
+        )
+
+        features_path = hf_hub_download(
+            repo_id=REPO_ID,
+            filename=FEATURES_FILENAME,
+        )
+
+        print("📦 Chargement du modèle...")
+
+        self.model = joblib.load(model_path)
+        self.selected_features = joblib.load(features_path)
 
         print("✅ Modèle chargé avec succès")
         print(f"✅ Nombre de variables : {len(self.selected_features)}")
